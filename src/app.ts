@@ -12,6 +12,9 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors());
 
 app.use('/images', express.static(path.join(__dirname, 'images')))
+app.get('/', (req, res) => {
+    res.send('Hey this is my API running 🥳')
+})
 app.use('/api/v1', vendorRouter)
 app.use('/api/v1', adminRouter)
 app.use('/api/v1', shoppingRouter)
