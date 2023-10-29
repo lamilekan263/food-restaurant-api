@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express'
 import cors from 'cors'
-import { adminRouter, shoppingRouter, vendorRouter, customerRouter } from './routes';
+import { adminRouter, shoppingRouter, vendorRouter, customerRouter, orderRouter } from './routes';
 import { ErrorMiddleware } from './middlewares/error';
 import path from 'path'
 
@@ -19,6 +19,7 @@ app.use('/api/v1', vendorRouter)
 app.use('/api/v1', adminRouter)
 app.use('/api/v1', shoppingRouter)
 app.use('/api/v1', customerRouter)
+app.use('/api/v1', orderRouter)
 
 app.use('*', (req: Request, res: Response, next: NextFunction) => {
     const err = new Error(`router ${req.originalUrl} not found`) as any;

@@ -1,5 +1,5 @@
 import express from 'express'
-import { getFoodAvailability, getFoodAvailableIn30Mins, getRestaurantById, getTopRestaurants, searchFood } from '../controllers/shopping.controller';
+import { getFoodAvailability, getFoodAvailableIn30Mins, getRestaurantById, getTopRestaurants, searchFood } from '../controllers';
 
 
 export const shoppingRouter = express.Router();

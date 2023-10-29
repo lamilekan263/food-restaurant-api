@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { CatchAsyncErrors } from "../middlewares/catchAsyncError";
 import ErrorHandler from "../utils/ErrorHandler";
-import { ICustomerLoginBody, ICustomerSignUpBody } from "../dto";
+import {  ICustomerLoginBody, ICustomerSignUpBody } from "../dto";
 import { customerModel } from "../models/customer.model";
 import { generateOtp } from "../utils/generateOtp";
 import { sendMail } from "../utils/sendEmail";
@@ -195,3 +195,6 @@ export const requestOtp = CatchAsyncErrors(async (req: Request, res: Response, n
         return next(new ErrorHandler(error.message, 400))
     }
 });
+
+
+
