@@ -15,7 +15,8 @@ interface ICustomerDoc extends Document {
     otpExpiry: Date,
     lat: number,
     lng: number,
-    orders: [any]
+    orders: [any],
+    cart: [any],
     comparePassword: (password: string) => Promise<Boolean>
 }
 
@@ -62,7 +63,16 @@ const CustomerSchema: Schema<ICustomerDoc> = new mongoose.Schema({
     orders: [{
         type: mongoose.Schema.ObjectId,
         ref: 'Order'
-    }]
+    }],
+    cart: [
+        {
+            food: {
+                type: mongoose.Schema.ObjectId, ref: 'food', required: true
+            },
+            unit: { type: Number, required: true }
+        }
+    ]
+    ,
 }, {
     timestamps: true
 })

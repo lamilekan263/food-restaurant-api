@@ -1,5 +1,5 @@
 import express from 'express';
-import { addFood, getFood, loginVendor, profile, updateCoverImages, updateProfile, updateService } from '../controllers';
+import { addFood, getCurrentOrders, getFood, getOrderDetails, loginVendor, processOrder, profile, updateCoverImages, updateProfile, updateService } from '../controllers';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
 import multer from 'multer';
 
@@ -27,3 +27,9 @@ vendorRouter.post('/vendor/add-food', isAuthenticated, uploadImage, addFood);
 vendorRouter.patch('/vendor/update-cover-image', isAuthenticated, uploadImage, updateCoverImages);
 vendorRouter.get('/vendor/get-food', getFood)
 
+
+
+// orders
+vendorRouter.get('/vendor/orders', getCurrentOrders);
+vendorRouter.get('/vendor/orders/:id', getOrderDetails);
+vendorRouter.put('/vendor/orders/:id/process', processOrder);

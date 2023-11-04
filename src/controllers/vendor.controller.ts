@@ -8,6 +8,7 @@ import { createFoodInput } from "../dto/Food.dto";
 import { foodModel } from "../models/food.model";
 import ErrorHandler from "../utils/ErrorHandler";
 import { createToken } from "../utils/jwt";
+import { orderModel } from "../models";
 
 
 export const loginVendor = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
@@ -196,3 +197,74 @@ export const getFood = CatchAsyncErrors(async (req: Request, res: Response, next
         return next(new ErrorHandler(error.message, 400))
     }
 });
+
+// orders
+
+export const getCurrentOrders = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+        const isExist = await vendorModel.findOne({ email: user?.email });
+        if (!isExist) {
+            return next(new ErrorHandler('Not found', 400))
+        }
+
+        const orders = await orderModel.find({ vendorId: isExist._id }).populate('items.food');
+
+        return res.status(200).json({
+            success: true,
+            orders
+        })
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})
+
+export const getOrderDetails = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        if (id) {
+            const order = await orderModel.findById(id).populate('items.food');
+
+
+            return res.status(200).json({
+                success: true,
+                order
+            })
+        }
+        return next(new ErrorHandler('Order not found', 404))
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})
+
+export const processOrder = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { status, remarks, time } = req.body;
+
+        if (id) {
+            const order = await orderModel.findById(id).populate('food');
+            if (order) {
+                order.orderStatus = status;
+                order.remarks = remarks;
+                if (time) {
+                    order.readyTime = time
+                }
+
+                const orderResult = await order.save();
+
+                if (orderResult !== null) {
+                    return res.status(200).json({
+                        success: true,
+                        order: orderResult
+                    })
+                }
+            }
+        }
+
+        return next(new ErrorHandler('Unable to process order', 404))
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})

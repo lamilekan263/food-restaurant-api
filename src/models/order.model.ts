@@ -26,6 +26,7 @@ const OrderSchema: Schema<IOrder> = new mongoose.Schema({
     },
     vendorId: {
         type: String,
+        required: true
 
     },
     items: {
