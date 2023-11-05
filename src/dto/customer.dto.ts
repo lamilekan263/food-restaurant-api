@@ -1,3 +1,4 @@
+import { IsEmail, Length } from "class-validator";
 
 export interface ICustomerSignUpBody {
     email: string;

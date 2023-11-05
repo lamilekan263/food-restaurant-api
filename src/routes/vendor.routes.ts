@@ -33,3 +33,11 @@ vendorRouter.get('/vendor/get-food', getFood)
 vendorRouter.get('/vendor/orders', getCurrentOrders);
 vendorRouter.get('/vendor/orders/:id', getOrderDetails);
 vendorRouter.put('/vendor/orders/:id/process', processOrder);
+
+
+// offers
+vendorRouter.get('/offers')
+vendorRouter.post('/offer')
+vendorRouter.put('/offer/:id')
+
+// delete offers

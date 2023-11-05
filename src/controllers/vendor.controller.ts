@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { CatchAsyncErrors } from "../middlewares/catchAsyncError";
 
-import { IVendorLoginBody, IVendorUpdateProfileBody } from "../dto";
+import { ICreateOfferInputs, IVendorLoginBody, IVendorUpdateProfileBody } from "../dto";
 import vendorModel from "../models/vendor.model";
 
 import { createFoodInput } from "../dto/Food.dto";
 import { foodModel } from "../models/food.model";
 import ErrorHandler from "../utils/ErrorHandler";
 import { createToken } from "../utils/jwt";
-import { orderModel } from "../models";
+import { offerModel, orderModel } from "../models";
 
 
 export const loginVendor = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
@@ -264,6 +264,120 @@ export const processOrder = CatchAsyncErrors(async (req: Request, res: Response,
         }
 
         return next(new ErrorHandler('Unable to process order', 404))
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})
+
+
+export const getOffers = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+
+        if (user) {
+            const offers = await offerModel.find().populate('vendors');
+            const currentVendor = await vendorModel.findOne({ email: user.email })
+            let currentOffers = new Array();
+            if (offers) {
+
+
+                offers.map(item => {
+                    if (item.vendors) {
+                        item.vendors.map(vendor => {
+                            if (vendor._id.toString() === currentVendor?._id) {
+                                currentOffers.push(item)
+                            }
+                        })
+                    }
+
+                    if (item.offerType === 'GENERIC') {
+                        currentOffers.push(item)
+                    }
+                })
+            }
+
+            return res.status(200).json({
+                success: true,
+                currentOffers
+            })
+        }
+        return next(new ErrorHandler('Offers not available', 400))
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})
+
+export const addOffer = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+        if (user) {
+            const { title, description, bank, bins, endValidity, isActive, minValue, offerAmount, offerType, pincode, promoCode, promoType, startValidity, vendors } = req.body as ICreateOfferInputs;
+
+            const vendor = await vendorModel.findOne({ email: user.email });
+
+            if (vendor) {
+                const offer = await offerModel.create({
+                    offerType,
+                    vendors: [vendor],
+                    title,
+                    description,
+                    minValue,
+                    offerAmount,
+                    startValidity,
+                    endValidity,
+                    promoCode,
+                    promoType,
+                    bank,
+                    bins,
+                    pincode,
+                    isActive
+                })
+                return res.status(200).json({
+                    success: true,
+                    offer
+                })
+            }
+        }
+        return next(new ErrorHandler('error creating offer', 400))
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+})
+
+export const editOffer = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+
+
+        if (user) {
+            const { title, description, bank, bins, endValidity, isActive, minValue, offerAmount, offerType, pincode, promoCode, promoType, startValidity, vendors } = req.body as ICreateOfferInputs;
+            const currentOffer = await offerModel.findById(id);
+
+            if (currentOffer) {
+                const vendor = await vendorModel.findOne({ email: user.email });
+
+                if (vendor) {
+                    currentOffer.title = title,
+                        currentOffer.description = description,
+                        currentOffer.offerType = offerType,
+                        currentOffer.offerAmount = offerAmount,
+                        currentOffer.pincode = pincode,
+                        currentOffer.promoType = promoType,
+                        currentOffer.startValidity = startValidity,
+                        currentOffer.endValidity = endValidity,
+                        currentOffer.bank = bank,
+                        currentOffer.isActive = isActive,
+                        currentOffer.minValue = minValue;
+
+                    const result = await currentOffer.save();
+
+                    return res.status(200).json(result);
+                }
+
+            }
+        }
+        return next(new ErrorHandler('error creating offer', 400))
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400))
     }

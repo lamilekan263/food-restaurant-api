@@ -11,6 +11,7 @@ export interface Ivendor {
     rating: number,
     password: string
     // foods: any
+    _id: string,
 }
 
 export interface IVendorLoginBody {
@@ -23,4 +24,21 @@ export interface IVendorUpdateProfileBody {
     foodTypes: [string],
     phone: string,
     address: string,
+}
+
+export interface ICreateOfferInputs {
+    offerType: string,
+    vendors: [any],
+    title: string,
+    description: string,
+    minValue: number,
+    offerAmount: number,
+    startValidity: Date,
+    endValidity: Date,
+    promoCode: string,
+    promoType: string,
+    bank: [any],
+    bins: [any],
+    pincode: string,
+    isActive: boolean
 }

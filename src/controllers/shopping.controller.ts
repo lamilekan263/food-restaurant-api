@@ -3,6 +3,7 @@ import { CatchAsyncErrors } from "../middlewares/catchAsyncError";
 import ErrorHandler from "../utils/ErrorHandler";
 import vendorModel from "../models/vendor.model";
 import { IFoodDoc } from "../models/food.model";
+import { offerModel } from "../models";
 
 
 export const getFoodAvailability = CatchAsyncErrors(async (req: Request, res: Response, next: NextFunction) => {
@@ -129,3 +130,16 @@ export const getRestaurantById = CatchAsyncErrors(async (req: Request, res: Resp
         return next(new ErrorHandler(error.message, 400))
     }
 })
+
+export const GetAvailableOffers = async (req: Request, res: Response, next: NextFunction) => {
+
+    const pincode = req.params.pincode;
+
+    const offers = await offerModel.find({ pincode: pincode, isActive: true });
+
+    if (offers) {
+        return res.status(200).json(offers);
+    }
+
+    return res.json({ message: 'Offers not Found!' });
+}

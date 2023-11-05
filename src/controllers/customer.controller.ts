@@ -6,7 +6,7 @@ import { customerModel } from "../models/customer.model";
 import { generateOtp } from "../utils/generateOtp";
 import { sendMail } from "../utils/sendEmail";
 import { createToken } from "../utils/jwt";
-import { foodModel, orderModel } from "../models";
+import { Transaction, foodModel, offerModel, orderModel } from "../models";
 
 
 
@@ -395,3 +395,63 @@ export const getOrderById = CatchAsyncErrors(async (req: Request, res: Response,
         return next(new ErrorHandler(error.message, 400))
     }
 });
+
+
+export const VerifyOffer = async (req: Request, res: Response, next: NextFunction) => {
+
+    const offerId = req.params.id;
+    const customer = req.user;
+
+    if (customer) {
+
+        const appliedOffer = await offerModel.findById(offerId);
+
+        if (appliedOffer) {
+            if (appliedOffer.isActive) {
+                return res.status(200).json({ message: 'Offer is Valid', offer: appliedOffer });
+            }
+        }
+
+    }
+
+    return res.status(400).json({ msg: 'Offer is Not Valid' });
+}
+
+
+export const CreatePayment = async (req: Request, res: Response, next: NextFunction) => {
+
+    const user = req.user;
+
+    const { amount, paymentMode, offerId } = req.body;
+
+    let payableAmount = Number(amount);
+
+    const customer = await customerModel.findOne({ email: user?.email })
+
+    if (offerId) {
+
+        const appliedOffer = await offerModel.findById(offerId);
+
+        if (appliedOffer?.isActive) {
+            payableAmount = (payableAmount - appliedOffer.offerAmount);
+        }
+    }
+    // perform payment gateway charge api
+
+    // create record on transaction
+    const transaction = await Transaction.create({
+        customer: customer?._id,
+        vendorId: '',
+        orderId: '',
+        orderValue: payableAmount,
+        offerUsed: offerId || 'NA',
+        status: 'OPEN',
+        paymentMode: paymentMode,
+        paymentResponse: 'Payment is cash on Delivery'
+    })
+
+
+    //return transaction
+    return res.status(200).json(transaction);
+
+}
